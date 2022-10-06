@@ -1,3 +1,6 @@
+use auto_gis_with_rust::Point;
+
 fn main() {
-    println!("Hello, world!");
+    let point = Point::new(0, 1);
+    dbg!(point);
 }
