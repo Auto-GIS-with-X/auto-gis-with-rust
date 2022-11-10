@@ -1,6 +1,7 @@
-use auto_gis_with_rust::Point;
+use auto_gis_with_rust::{error::GeometryError, polygon::Polygon};
 
-fn main() {
-    let point = Point::new(0, 1);
-    dbg!(point);
+fn main() -> Result<(), GeometryError> {
+    let polygon = Polygon::new(vec![[0., 0.], [0., 1.], [1., 1.]])?;
+    dbg!(polygon);
+    Ok(())
 }
