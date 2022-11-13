@@ -56,3 +56,58 @@ impl fmt::Display for LineString {
         write!(f, "LINESTRING ({})", points)
     }
 }
+
+#[derive(Debug, PartialEq, PartialOrd)]
+pub struct MultiLineString(Vec<LineString>);
+
+impl MultiLineString {
+    /// Construct a new `MultiLineString` from a vector of 'LineString's.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::line_string::{LineString, MultiLineString};
+    ///
+    /// let line_string_1 = LineString::new(vec![[0., 0.], [1., 0.], [1., 1.]]).unwrap();
+    /// let line_string_2 = LineString::new(vec![[1., 2.], [0., 2.], [0., 1.]]).unwrap();
+    ///
+    /// let multi_line_string = MultiLineString::new(vec![line_string_1, line_string_2]);
+    ///
+    /// assert_eq!("MULTILINESTRING ((0 0, 1 0, 1 1), (1 2, 0 2, 0 1))", multi_line_string.to_string());
+    /// ```
+    pub fn new(linestrings: Vec<LineString>) -> Self {
+        MultiLineString(linestrings)
+    }
+
+    /// Returns an iterator of `LineStrings`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use auto_gis_with_rust::line_string::{LineString, MultiLineString};
+    ///
+    /// let line_string_1 = LineString::new(vec![[0., 0.], [1., 0.], [1., 1.]]).unwrap();
+    /// let line_string_2 = LineString::new(vec![[1., 2.], [0., 2.], [0., 1.]]).unwrap();
+    ///
+    /// let multi_line_string = MultiLineString::new(vec![line_string_1, line_string_2]);
+    ///
+    /// assert_eq!("LINESTRING (0 0, 1 0, 1 1)", multi_line_string.iter().next().unwrap().to_string())
+    /// ```
+    pub fn iter(&self) -> Iter<LineString> {
+        self.0.iter()
+    }
+}
+
+impl fmt::Display for MultiLineString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let line_strings = self
+            .iter()
+            .map(|line_string| {
+                line_string.iter().format_with(", ", |point, f| {
+                    f(&format_args!("{} {}", point[0], point[1]))
+                })
+            })
+            .format_with(", ", |line_string, f| f(&format_args!("({})", line_string)));
+        write!(f, "MULTILINESTRING ({})", line_strings)
+    }
+}
