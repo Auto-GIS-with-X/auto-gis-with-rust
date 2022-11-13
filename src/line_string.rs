@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::{fmt, slice::Iter};
 
 use itertools::Itertools;
@@ -109,5 +110,29 @@ impl fmt::Display for MultiLineString {
             })
             .format_with(", ", |line_string, f| f(&format_args!("({})", line_string)));
         write!(f, "MULTILINESTRING ({})", line_strings)
+    }
+}
+
+impl<T: NumCast> TryFrom<Vec<Vec<[T; 2]>>> for MultiLineString {
+    type Error = GeometryError;
+
+    /// Tries to convert a vector or vectors of 2-float arrays into a `MultiLineString`.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::line_string::{LineString, MultiLineString};
+    ///
+    /// let multi_line_string = MultiLineString::try_from(vec![
+    ///    vec![[0., 0.], [1., 0.], [1., 1.]],
+    ///    vec![[1., 2.], [0., 2.], [0., 1.]],
+    /// ]).unwrap();
+    ///
+    /// assert_eq!("MULTILINESTRING ((0 0, 1 0, 1 1), (1 2, 0 2, 0 1))", multi_line_string.to_string());
+    /// ```
+    fn try_from(vectors: Vec<Vec<[T; 2]>>) -> Result<Self, GeometryError> {
+        let line_strings: Result<Vec<LineString>, GeometryError> =
+            vectors.into_iter().map(LineString::new).collect();
+        Ok(MultiLineString::new(line_strings?))
     }
 }
