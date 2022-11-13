@@ -24,3 +24,31 @@ impl Point {
         Point([x_float, y_float])
     }
 }
+
+#[derive(Debug, PartialEq, PartialOrd)]
+pub struct MultiPoint(pub Vec<Point>);
+
+impl MultiPoint {
+    /// Construct a new `MultiPoint`.
+    ///
+    /// # Examples:
+    ///
+    /// Construct a new multi-point vector of `Point`s.
+    ///
+    /// ```
+    /// use auto_gis_with_rust::point::{Point, MultiPoint};
+    ///
+    /// let point_0 = Point::new(0.0, 0.0);
+    /// let point_1 = Point::new(1.0, 0.0);
+    /// let multi_point_0 = MultiPoint(vec![point_0, point_1]);
+
+    /// let point_2 = Point::new(0, 0);
+    /// let point_3 = Point::new(1, 0);
+    /// let multi_point_1 = MultiPoint(vec![point_2, point_3]);
+    ///
+    /// assert_eq!(multi_point_0, multi_point_1);
+    /// ```
+    pub fn new(points: Vec<Point>) -> Self {
+        MultiPoint(points)
+    }
+}
