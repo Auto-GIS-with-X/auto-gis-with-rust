@@ -70,7 +70,7 @@ impl MultiPoint {
     /// let point_1 = Point::new(1, 0);
     /// let multi_point = MultiPoint(vec![point_0, point_1]);
     ///
-    /// assert_eq!("MULTIPOINT (0 0, 1 0)", multi_point.to_string());
+    /// assert_eq!("MULTIPOINT ((0 0), (1 0))", multi_point.to_string());
     /// ```
     pub fn new(points: Vec<Point>) -> Self {
         MultiPoint(points)
@@ -96,7 +96,7 @@ impl MultiPoint {
 impl fmt::Display for MultiPoint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let points = self.iter().format_with(", ", |point, f| {
-            f(&format_args!("{} {}", point.0[0], point.0[1]))
+            f(&format_args!("({} {})", point.0[0], point.0[1]))
         });
         write!(f, "MULTIPOINT ({})", points)
     }
