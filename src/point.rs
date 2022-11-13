@@ -36,6 +36,23 @@ impl fmt::Display for Point {
     }
 }
 
+impl<T: NumCast + Copy> From<[T; 2]> for Point {
+    /// Construct a `Point` from a 2-element array.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::point::Point;
+    ///
+    /// let point = Point::from([0.0, 1.0]);
+    ///
+    /// assert_eq!("POINT (0 1)", point.to_string());
+    /// ```
+    fn from(coordinates: [T; 2]) -> Self {
+        Point::new(coordinates[0], coordinates[1])
+    }
+}
+
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct MultiPoint(pub Vec<Point>);
 
@@ -82,5 +99,23 @@ impl fmt::Display for MultiPoint {
             f(&format_args!("{} {}", point.0[0], point.0[1]))
         });
         write!(f, "MULTIPOINT ({})", points)
+    }
+}
+
+impl<T: NumCast + Copy> From<Vec<[T; 2]>> for MultiPoint {
+    /// Construct a `MultiPoint` from a vector of 2-element arrays.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::point::MultiPoint;
+    ///
+    /// let multi_point = MultiPoint::from(vec![[0.0, 0.0], [1.0, 0.0]]);
+    ///
+    /// assert_eq!("MULTIPOINT (0 0, 1 0)", multi_point.to_string());
+    /// ```
+    fn from(items: Vec<[T; 2]>) -> Self {
+        let points: Vec<Point> = items.into_iter().map(Point::from).collect();
+        MultiPoint::new(points)
     }
 }
