@@ -112,7 +112,7 @@ impl<T: NumCast + Copy> From<Vec<[T; 2]>> for MultiPoint {
     ///
     /// let multi_point = MultiPoint::from(vec![[0.0, 0.0], [1.0, 0.0]]);
     ///
-    /// assert_eq!("MULTIPOINT (0 0, 1 0)", multi_point.to_string());
+    /// assert_eq!("MULTIPOINT ((0 0), (1 0))", multi_point.to_string());
     /// ```
     fn from(items: Vec<[T; 2]>) -> Self {
         let points: Vec<Point> = items.into_iter().map(Point::from).collect();
