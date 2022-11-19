@@ -1,4 +1,4 @@
-use std::{fmt, slice::Iter};
+use std::{fmt, ops::Deref};
 
 use itertools::Itertools;
 use num_traits::{self, NumCast};
@@ -30,9 +30,17 @@ impl Point {
     }
 }
 
+impl Deref for Point {
+    type Target = [f64; 2];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "POINT ({} {})", self.0[0], self.0[1])
+        write!(f, "POINT ({} {})", self[0], self[1])
     }
 }
 
@@ -75,28 +83,20 @@ impl MultiPoint {
     pub fn new(points: Vec<Point>) -> Self {
         MultiPoint(points)
     }
+}
 
-    /// Returns an iterator of `Points`
-    ///
-    /// # Example
-    /// ```
-    /// use auto_gis_with_rust::point::{Point, MultiPoint};
-    ///
-    /// let point_0 = Point::new(0.0, 0.0);
-    /// let point_1 = Point::new(1, 0);
-    /// let multi_point = MultiPoint(vec![point_0, point_1]);
-    ///
-    /// assert_eq!("POINT (0 0)", multi_point.iter().next().unwrap().to_string())
-    /// ```
-    pub fn iter(&self) -> Iter<Point> {
-        self.0.iter()
+impl Deref for MultiPoint {
+    type Target = Vec<Point>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
 impl fmt::Display for MultiPoint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let points = self.iter().format_with(", ", |point, f| {
-            f(&format_args!("({} {})", point.0[0], point.0[1]))
+            f(&format_args!("({} {})", point[0], point[1]))
         });
         write!(f, "MULTIPOINT ({})", points)
     }
