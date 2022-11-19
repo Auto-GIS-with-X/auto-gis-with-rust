@@ -1,7 +1,9 @@
+use std::{fmt, ops::Deref};
+
+use itertools::Itertools;
 use num_traits::NumCast;
 
-use crate::error::GeometryError;
-use crate::helpers;
+use crate::{error::GeometryError, helpers};
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct PolygonRing(Vec<[f64; 2]>);
@@ -37,6 +39,14 @@ impl PolygonRing {
     }
 }
 
+impl Deref for PolygonRing {
+    type Target = Vec<[f64; 2]>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct Polygon(Vec<PolygonRing>);
 
@@ -44,6 +54,14 @@ impl Polygon {
     /// Construct a new `Polygon` from a vector of vectors of 2-element arrays.
     ///
     /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::polygon::Polygon;
+    ///
+    /// let polygon_1 = Polygon::new(vec![vec![[0., 0.], [0., 1.], [1., 1.], [0., 0.]]]).unwrap();
+    ///
+    /// assert_eq!("POLYGON ((0 0, 0 1, 1 1, 0 0))", polygon_1.to_string());
+    /// ```
     ///
     /// Construct a new `Polygon` from a vector of vectors of floats or a vector of vectors of integers.
     ///
@@ -61,5 +79,130 @@ impl Polygon {
             .map(|ring| PolygonRing::new(ring).unwrap())
             .collect();
         Ok(Polygon(polygon_rings))
+    }
+}
+
+impl Deref for Polygon {
+    type Target = Vec<PolygonRing>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl fmt::Display for Polygon {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let rings = self
+            .iter()
+            .map(|ring| {
+                ring.iter().format_with(", ", |point, f| {
+                    f(&format_args!("{} {}", point[0], point[1]))
+                })
+            })
+            .format_with(", ", |ring, f| f(&format_args!("({})", ring)));
+        write!(f, "POLYGON ({})", rings)
+    }
+}
+#[derive(Debug, PartialEq, PartialOrd)]
+pub struct MultiPolygon(Vec<Polygon>);
+
+impl MultiPolygon {
+    /// Construct a new `MultiPolygon` from a vector of `Polygon`s.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::polygon::{MultiPolygon, Polygon};
+    ///
+    /// let polygon_1 = Polygon::new(vec![vec![[0., 0.], [0., 1.], [1., 1.], [1., 0.], [0., 0.]]]).unwrap();
+    /// let polygon_2 = Polygon::new(vec![vec![[1, 1], [1, 2], [2, 2], [2, 1]]]).unwrap();
+    ///
+    /// let multi_polygon = MultiPolygon::new(vec![polygon_1, polygon_2]);
+    ///
+    /// assert_eq!("MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0, 0 0)), ((1 1, 1 2, 2 2, 2 1, 1 1)))", multi_polygon.to_string());
+    /// ```
+    pub fn new(polygons: Vec<Polygon>) -> Self {
+        MultiPolygon(polygons)
+    }
+}
+
+impl Deref for MultiPolygon {
+    type Target = Vec<Polygon>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl fmt::Display for MultiPolygon {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let polygons = self
+            .iter()
+            .map(|polygon| {
+                polygon
+                    .iter()
+                    .map(|ring| {
+                        ring.iter().format_with(", ", |point, f| {
+                            f(&format_args!("{} {}", point[0], point[1]))
+                        })
+                    })
+                    .format_with(", ", |ring, f| f(&format_args!("({})", ring)))
+            })
+            .format_with(", ", |polygon, f| f(&format_args!("({})", polygon)));
+        write!(f, "MULTIPOLYGON ({})", polygons)
+    }
+}
+
+impl<T: NumCast> TryFrom<Vec<Vec<Vec<[T; 2]>>>> for MultiPolygon {
+    type Error = GeometryError;
+
+    /// Tries to convert a vector of vectors of vectors of 2-float arrays into a `MultiPolygon`.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::polygon::MultiPolygon;
+    ///
+    /// let multi_polygon_1 = MultiPolygon::try_from(vec![
+    ///     vec![
+    ///         vec![[0., 0.], [0., 1.], [1., 1.], [1., 0.], [0., 0.]],
+    ///     ],
+    ///     vec![
+    ///         vec![[1., 1.], [1., 2.], [2., 2.], [2., 1.]],
+    ///     ],
+    /// ]).unwrap();
+    ///
+    /// assert_eq!("MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0, 0 0)), ((1 1, 1 2, 2 2, 2 1, 1 1)))", multi_polygon_1.to_string());
+    /// ```
+    ///
+    /// Or tries to convert a vector of vectors of vectors of 2-integer arrays into a `MultiPolygon`.
+    ///
+    /// ```
+    /// # use auto_gis_with_rust::polygon::MultiPolygon;
+    /// #    
+    /// # let multi_polygon_1 = MultiPolygon::try_from(vec![
+    /// #     vec![
+    /// #         vec![[0., 0.], [0., 1.], [1., 1.], [1., 0.], [0., 0.]],
+    /// #     ],
+    /// #     vec![
+    /// #         vec![[1., 1.], [1., 2.], [2., 2.], [2., 1.]],
+    /// #     ],
+    /// # ]).unwrap();
+    ///
+    /// let multi_polygon_2 = MultiPolygon::try_from(vec![
+    ///     vec![
+    ///         vec![[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]],
+    ///     ],
+    ///     vec![
+    ///         vec![[1, 1], [1, 2], [2, 2], [2, 1]],
+    ///     ],
+    /// ]).unwrap();
+    ///
+    /// assert_eq!(multi_polygon_1, multi_polygon_2);
+    /// ```
+    fn try_from(vectors: Vec<Vec<Vec<[T; 2]>>>) -> Result<Self, GeometryError> {
+        let polygons: Result<Vec<Polygon>, GeometryError> =
+            vectors.into_iter().map(Polygon::new).collect();
+        Ok(MultiPolygon::new(polygons?))
     }
 }
