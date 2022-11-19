@@ -1,5 +1,6 @@
 use std::convert::TryFrom;
-use std::{fmt, slice::Iter};
+use std::fmt;
+use std::ops::Deref;
 
 use itertools::Itertools;
 use num_traits::NumCast;
@@ -42,10 +43,13 @@ impl LineString {
             Ok(LineString(float_coordinates))
         }
     }
+}
 
-    /// Returns an iterator of 2 64-bit float arrays.
-    pub fn iter(&self) -> Iter<[f64; 2]> {
-        self.0.iter()
+impl Deref for LineString {
+    type Target = Vec<[f64; 2]>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -79,23 +83,13 @@ impl MultiLineString {
     pub fn new(linestrings: Vec<LineString>) -> Self {
         MultiLineString(linestrings)
     }
+}
 
-    /// Returns an iterator of `LineStrings`
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use auto_gis_with_rust::line_string::{LineString, MultiLineString};
-    ///
-    /// let line_string_1 = LineString::new(vec![[0., 0.], [1., 0.], [1., 1.]]).unwrap();
-    /// let line_string_2 = LineString::new(vec![[1., 2.], [0., 2.], [0., 1.]]).unwrap();
-    ///
-    /// let multi_line_string = MultiLineString::new(vec![line_string_1, line_string_2]);
-    ///
-    /// assert_eq!("LINESTRING (0 0, 1 0, 1 1)", multi_line_string.iter().next().unwrap().to_string())
-    /// ```
-    pub fn iter(&self) -> Iter<LineString> {
-        self.0.iter()
+impl Deref for MultiLineString {
+    type Target = Vec<LineString>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
