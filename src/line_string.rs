@@ -1,12 +1,10 @@
-use std::convert::TryFrom;
-use std::fmt;
-use std::ops::Deref;
+use std::{convert::TryFrom, fmt, ops::Deref};
 
 use itertools::Itertools;
 use num_traits::NumCast;
 
 use crate::error::GeometryError;
-use crate::helpers;
+use crate::{helpers, implement_deref};
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct LineString(Vec<[f64; 2]>);
@@ -45,13 +43,7 @@ impl LineString {
     }
 }
 
-impl Deref for LineString {
-    type Target = Vec<[f64; 2]>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+implement_deref!(LineString, Vec<[f64; 2]>);
 
 impl fmt::Display for LineString {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -85,13 +77,7 @@ impl MultiLineString {
     }
 }
 
-impl Deref for MultiLineString {
-    type Target = Vec<LineString>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+implement_deref!(MultiLineString, Vec<LineString>);
 
 impl fmt::Display for MultiLineString {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -115,6 +101,7 @@ impl<T: NumCast> TryFrom<Vec<Vec<[T; 2]>>> for MultiLineString {
     /// # Examples:
     ///
     /// ```
+    /// use std::convert::TryFrom;
     /// use auto_gis_with_rust::line_string::{LineString, MultiLineString};
     ///
     /// let multi_line_string = MultiLineString::try_from(vec![

@@ -1,9 +1,9 @@
-use std::{fmt, ops::Deref};
+use std::{convert::TryFrom, fmt, ops::Deref};
 
 use itertools::Itertools;
 use num_traits::NumCast;
 
-use crate::{error::GeometryError, helpers};
+use crate::{error::GeometryError, helpers, implement_deref};
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct PolygonRing(Vec<[f64; 2]>);
@@ -39,13 +39,7 @@ impl PolygonRing {
     }
 }
 
-impl Deref for PolygonRing {
-    type Target = Vec<[f64; 2]>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+implement_deref!(PolygonRing, Vec<[f64; 2]>);
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct Polygon(Vec<PolygonRing>);
@@ -82,13 +76,7 @@ impl Polygon {
     }
 }
 
-impl Deref for Polygon {
-    type Target = Vec<PolygonRing>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+implement_deref!(Polygon, Vec<PolygonRing>);
 
 impl fmt::Display for Polygon {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -126,13 +114,7 @@ impl MultiPolygon {
     }
 }
 
-impl Deref for MultiPolygon {
-    type Target = Vec<Polygon>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+implement_deref!(MultiPolygon, Vec<Polygon>);
 
 impl fmt::Display for MultiPolygon {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -161,6 +143,7 @@ impl<T: NumCast> TryFrom<Vec<Vec<Vec<[T; 2]>>>> for MultiPolygon {
     /// # Examples:
     ///
     /// ```
+    /// use std::convert::TryFrom;
     /// use auto_gis_with_rust::polygon::MultiPolygon;
     ///
     /// let multi_polygon_1 = MultiPolygon::try_from(vec![
@@ -178,6 +161,7 @@ impl<T: NumCast> TryFrom<Vec<Vec<Vec<[T; 2]>>>> for MultiPolygon {
     /// Or tries to convert a vector of vectors of vectors of 2-integer arrays into a `MultiPolygon`.
     ///
     /// ```
+    /// # use std::convert::TryFrom;
     /// # use auto_gis_with_rust::polygon::MultiPolygon;
     /// #    
     /// # let multi_polygon_1 = MultiPolygon::try_from(vec![

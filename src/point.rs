@@ -3,6 +3,8 @@ use std::{fmt, ops::Deref};
 use itertools::Itertools;
 use num_traits::{self, NumCast};
 
+use crate::implement_deref;
+
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct Point([f64; 2]);
 
@@ -30,13 +32,7 @@ impl Point {
     }
 }
 
-impl Deref for Point {
-    type Target = [f64; 2];
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+implement_deref!(Point, [f64; 2]);
 
 impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -85,13 +81,7 @@ impl MultiPoint {
     }
 }
 
-impl Deref for MultiPoint {
-    type Target = Vec<Point>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+implement_deref!(MultiPoint, Vec<Point>);
 
 impl fmt::Display for MultiPoint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

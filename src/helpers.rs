@@ -21,3 +21,16 @@ pub fn get_float_coordinates<T: NumCast>(coordinates: Vec<[T; 2]>) -> Vec<[f64; 
         .collect();
     float_coordinates
 }
+
+#[macro_export]
+macro_rules! implement_deref {
+    ($type:ty, $target:ty) => {
+        impl Deref for $type {
+            type Target = $target;
+
+            fn deref(&self) -> &Self::Target {
+                &self.0
+            }
+        }
+    };
+}
