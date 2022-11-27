@@ -3,9 +3,10 @@ use std::{fmt, ops::Deref};
 use itertools::Itertools;
 use num_traits::{self, NumCast};
 
+use crate::geometry::{Geometry, GeometryCollection};
 use crate::implement_deref;
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub struct Point([f64; 2]);
 
 impl Point {
@@ -68,7 +69,7 @@ implement_deref!(Point, [f64; 2]);
 
 impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "POINT ({} {})", self[0], self[1])
+        write!(f, "POINT ({} {})", self.x(), self.y())
     }
 }
 
@@ -86,6 +87,25 @@ impl<T: NumCast + Copy> From<[T; 2]> for Point {
     /// ```
     fn from(coordinates: [T; 2]) -> Self {
         Point::new(coordinates[0], coordinates[1])
+    }
+}
+
+impl Geometry for Point {
+    /// Compute the geometric center of a geometry.
+    ///
+    /// For a `Point`, this is a new `Point` with the same coordinates.
+    ///
+    /// ```
+    /// use auto_gis_with_rust::geometry::Geometry;
+    /// use auto_gis_with_rust::point::Point;
+    ///
+    /// let point = Point::new(0.0, 1.0);
+    /// let expected_centroid = Point::new(0.0, 1.0);
+    ///
+    /// assert_eq!(point.centroid(), expected_centroid);
+    /// ```
+    fn centroid(&self) -> Point {
+        Point::new(self.x(), self.y())
     }
 }
 
