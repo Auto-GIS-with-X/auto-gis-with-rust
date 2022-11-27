@@ -23,5 +23,5 @@ jobs:
         run: |
           git config --global user.name ${{ secrets.NAME }}
           git config --global user.email ${{ secrets.EMAIL }}
-          git commit -am "Format with `cargo fmt`"
+          git add . && git diff --staged --quiet || git commit -m "Format with `cargo fmt`"
           git push
