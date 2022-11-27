@@ -613,4 +613,3 @@ impl Polygon {
     }
 }
 ```
-

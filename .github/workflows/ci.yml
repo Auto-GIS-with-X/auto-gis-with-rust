@@ -9,19 +9,19 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@v1
-      with:
-        toolchain: stable
-        components: rustfmt
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt
 
-    - name: Check formatting
-      run: |
-        cargo fmt --all
-      
-    - name: Commit and push formatted files
-      run: |
-        git config --global user.name ${{ secrets.NAME }}
-        git config --global user.email ${{ secrets.EMAIL }}
-        git commit -am "Format with `cargo fmt`"
-        git push
+      - name: Check formatting
+        run: |
+          cargo fmt --all
+        
+      - name: Commit and push formatted files
+        run: |
+          git config --global user.name ${{ secrets.NAME }}
+          git config --global user.email ${{ secrets.EMAIL }}
+          git commit -am "Format with `cargo fmt`"
+          git push
