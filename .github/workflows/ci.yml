@@ -15,11 +15,11 @@ jobs:
           toolchain: stable
           components: rustfmt
 
-      - name: Check formatting
+      - name: Format files
         run: |
           cargo fmt --all
         
-      - name: Commit and push formatted files
+      - name: Commit and push
         run: |
           git config --global user.name ${{ secrets.NAME }}
           git config --global user.email ${{ secrets.EMAIL }}
