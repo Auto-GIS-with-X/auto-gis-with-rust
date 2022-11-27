@@ -21,7 +21,7 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Run tests
+      - name: Run audit
         run: |
           cargo install cargo-audit
           cargo audit
