@@ -161,3 +161,60 @@ impl<T: NumCast + Copy> From<Vec<[T; 2]>> for MultiPoint {
         MultiPoint::new(points)
     }
 }
+
+impl GeometryCollection<Point> for MultiPoint {
+    /// Returns the number of `Point`s in this `MultiPoint` collection.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::geometry::GeometryCollection;
+    /// use auto_gis_with_rust::point::MultiPoint;
+    ///
+    /// let multi_point = MultiPoint::from(vec![[0.0, 0.0], [1.0, 0.0]]);
+    /// let points = multi_point.number_of_geometries();
+    ///
+    /// assert_eq!(points, 2);
+    /// ```
+    fn number_of_geometries(&self) -> usize {
+        self.len()
+    }
+
+    /// Returns the Nth `Point` in this `MultiPoint` collection.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::geometry::GeometryCollection;
+    /// use auto_gis_with_rust::point::MultiPoint;
+    ///
+    /// let multi_point = MultiPoint::from(vec![[0.0, 0.0], [1.0, 0.0]]);
+    /// let point_0 = multi_point.geometry_n(0);
+    ///
+    /// assert_eq!("POINT (0 0)", point_0.to_string());
+    /// ```
+    fn geometry_n(&self, number: usize) -> Point {
+        self[number]
+    }
+}
+
+impl Geometry for MultiPoint {
+    /// Compute the geometric center of a geometry.
+    ///
+    /// For a `MultiPoint`, this is a new `Point` with the mean x and y coordinates of all the points in the collection.
+    ///
+    /// ```
+    /// use auto_gis_with_rust::geometry::Geometry;
+    /// use auto_gis_with_rust::point::MultiPoint;
+    ///
+    /// let multi_point = MultiPoint::from(vec![[0., 0.], [1., 0.]]);
+    ///
+    /// assert_eq!(multi_point.centroid().to_string(), "POINT (0.5 0)");
+    /// ```
+    fn centroid(&self) -> Point {
+        let points = self.number_of_geometries() as f64;
+        let sum_x: f64 = self.iter().map(|point| point.x()).sum();
+        let sum_y: f64 = self.iter().map(|point| point.y()).sum();
+        Point::new(sum_x / points, sum_y / points)
+    }
+}
