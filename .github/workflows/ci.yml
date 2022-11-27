@@ -1,0 +1,21 @@
+name: Continuous integration
+on: [push, pull_request]
+
+jobs:
+  format:
+    name: cargo format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Run `cargo fmt`
+        uses: dtolnay/rust-toolchain@stable
+        run: cargo fmt --all
+      
+      - name: Commit and push formatted files
+        run: |
+          git config --global user.name ${{ secrets.NAME }}
+          git config --global user.email ${{ secrets.EMAIL }}
+          git commit -am "Format with `cargo fmt`"
+          git push
