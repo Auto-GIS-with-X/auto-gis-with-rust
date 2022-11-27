@@ -30,6 +30,38 @@ impl Point {
         let y_float: f64 = num_traits::cast(y).unwrap();
         Point([x_float, y_float])
     }
+
+    /// Return the x-coordinate value for this `Point`.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::point::Point;
+    ///
+    /// let point = Point::new(0.0, 1.0);
+    /// let x = point.x();
+    ///
+    /// assert_eq!(x, 0f64);
+    /// ```
+    pub fn x(&self) -> f64 {
+        self[0]
+    }
+
+    /// Return the y-coordinate value for this `Point`.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::point::Point;
+    ///
+    /// let point = Point::new(0.0, 1.0);
+    /// let y = point.y();
+    ///
+    /// assert_eq!(y, 1f64);
+    /// ```
+    pub fn y(&self) -> f64 {
+        self[1]
+    }
 }
 
 implement_deref!(Point, [f64; 2]);
