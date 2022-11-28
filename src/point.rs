@@ -172,11 +172,11 @@ impl GeometryCollection<Point> for MultiPoint {
     /// use auto_gis_with_rust::point::MultiPoint;
     ///
     /// let multi_point = MultiPoint::from(vec![[0.0, 0.0], [1.0, 0.0]]);
-    /// let points = multi_point.number_of_geometries();
+    /// let points = multi_point.num_geometries();
     ///
     /// assert_eq!(points, 2);
     /// ```
-    fn number_of_geometries(&self) -> usize {
+    fn num_geometries(&self) -> usize {
         self.len()
     }
 
@@ -212,7 +212,7 @@ impl Geometry for MultiPoint {
     /// assert_eq!(multi_point.centroid().to_string(), "POINT (0.5 0)");
     /// ```
     fn centroid(&self) -> Point {
-        let points = self.number_of_geometries() as f64;
+        let points = self.num_geometries() as f64;
         let sum_x: f64 = self.iter().map(|point| point.x()).sum();
         let sum_y: f64 = self.iter().map(|point| point.y()).sum();
         Point::new(sum_x / points, sum_y / points)

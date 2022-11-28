@@ -5,7 +5,7 @@ pub trait Geometry {
 }
 
 pub trait GeometryCollection<T: Geometry> {
-    fn number_of_geometries(&self) -> usize;
+    fn num_geometries(&self) -> usize;
 
     fn geometry_n(&self, number: usize) -> T;
 }
