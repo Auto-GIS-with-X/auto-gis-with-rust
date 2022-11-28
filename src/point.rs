@@ -3,8 +3,8 @@ use std::{fmt, ops::Deref};
 use itertools::Itertools;
 use num_traits::{self, NumCast};
 
-use crate::geometry::{Geometry, GeometryCollection};
 use crate::implement_deref;
+use crate::traits::{Geometry, GeometryCollection};
 
 #[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
 pub struct Point([f64; 2]);
@@ -63,6 +63,24 @@ impl Point {
     pub fn y(&self) -> f64 {
         self[1]
     }
+
+    /// Return the z-coordinate value for this `Point`, if it has one.
+    pub fn z(&self) -> Option<f64> {
+        if self.len() <= 2 {
+            None
+        } else {
+            Some(self[2])
+        }
+    }
+
+    /// Return the m-coordinate value for this `Point`, if it has one.
+    pub fn m(&self) -> Option<f64> {
+        if self.len() <= 3 {
+            None
+        } else {
+            Some(self[3])
+        }
+    }
 }
 
 implement_deref!(Point, [f64; 2]);
@@ -96,7 +114,7 @@ impl Geometry for Point {
     /// For a `Point`, this is a new `Point` with the same coordinates.
     ///
     /// ```
-    /// use auto_gis_with_rust::geometry::Geometry;
+    /// use auto_gis_with_rust::traits::Geometry;
     /// use auto_gis_with_rust::point::Point;
     ///
     /// let point = Point::new(0.0, 1.0);
@@ -106,6 +124,11 @@ impl Geometry for Point {
     /// ```
     fn centroid(&self) -> Point {
         Point::new(self.x(), self.y())
+    }
+
+    /// A `Point` is always simple.
+    fn is_simple(&self) -> bool {
+        true
     }
 }
 
@@ -168,7 +191,7 @@ impl GeometryCollection<Point> for MultiPoint {
     /// # Examples:
     ///
     /// ```
-    /// use auto_gis_with_rust::geometry::GeometryCollection;
+    /// use auto_gis_with_rust::traits::GeometryCollection;
     /// use auto_gis_with_rust::point::MultiPoint;
     ///
     /// let multi_point = MultiPoint::from(vec![[0.0, 0.0], [1.0, 0.0]]);
@@ -185,7 +208,7 @@ impl GeometryCollection<Point> for MultiPoint {
     /// # Examples:
     ///
     /// ```
-    /// use auto_gis_with_rust::geometry::GeometryCollection;
+    /// use auto_gis_with_rust::traits::GeometryCollection;
     /// use auto_gis_with_rust::point::MultiPoint;
     ///
     /// let multi_point = MultiPoint::from(vec![[0.0, 0.0], [1.0, 0.0]]);
@@ -204,7 +227,7 @@ impl Geometry for MultiPoint {
     /// For a `MultiPoint`, this is a new `Point` with the mean x and y coordinates of all the points in the collection.
     ///
     /// ```
-    /// use auto_gis_with_rust::geometry::Geometry;
+    /// use auto_gis_with_rust::traits::Geometry;
     /// use auto_gis_with_rust::point::MultiPoint;
     ///
     /// let multi_point = MultiPoint::from(vec![[0., 0.], [1., 0.]]);
@@ -216,5 +239,42 @@ impl Geometry for MultiPoint {
         let sum_x: f64 = self.iter().map(|point| point.x()).sum();
         let sum_y: f64 = self.iter().map(|point| point.y()).sum();
         Point::new(sum_x / points, sum_y / points)
+    }
+
+    /// A `MultiPoint` is simple if no two `Points` in the MultiPoint are equal,
+    /// i.e. none of them have the same coordinates.
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use auto_gis_with_rust::traits::Geometry;
+    /// use auto_gis_with_rust::point::MultiPoint;
+    ///
+    /// let multi_point_1 = MultiPoint::from(vec![[0., 0.], [1., 0.]]);
+    ///
+    /// assert!(multi_point_1.is_simple());
+    /// ```
+    ///
+    /// ```
+    /// # use auto_gis_with_rust::traits::Geometry;
+    /// # use auto_gis_with_rust::point::MultiPoint;
+    ///
+    /// let multi_point_2 = MultiPoint::from(vec![[0., 0.], [0., 0.]]);
+    ///
+    /// assert_eq!(multi_point_2.is_simple(), false);
+    /// ```
+    fn is_simple(&self) -> bool {
+        for point in self.iter() {
+            let mut matches: usize = 0;
+            for other_point in self.iter() {
+                if point == other_point {
+                    matches += 1;
+                    if matches > 1 {
+                        return false;
+                    }
+                }
+            }
+        }
+        true
     }
 }
