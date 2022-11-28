@@ -24,7 +24,7 @@ pub trait Curve {
     fn is_ring(&self) -> bool;
 }
 
-pub trait LineString {
+pub trait LineString: Curve {
     fn num_points(&self) -> usize;
 
     fn point_n(&self, number: usize) -> Point;
